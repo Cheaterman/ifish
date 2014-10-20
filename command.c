@@ -1,0 +1,4 @@
+void
+command_interpret()
+{
+}
