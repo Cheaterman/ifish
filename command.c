@@ -16,11 +16,19 @@ command_interpret(char* input)
         return;
     }
 
-#ifdef DEBUG
-    int i;
+    int i, fork_to_background = 0;
     for(i = 0; argv[i] != NULL; ++i)
+    {
+#ifdef DEBUG
         printf("%s\n", argv[i]);
 #endif
+    }
+
+    if(i != 0 && !strcmp(argv[i - 1], "&"))
+    {
+        fork_to_background = 1;
+        argv[i - 1] = NULL;
+    }
 
     int current_pid = safefork();
     if(current_pid == 0)
@@ -40,13 +48,18 @@ command_interpret(char* input)
         printf("ifish: %s: command not found\n", argv[0]);
         exit(-1);
     }
-    else
+    else if(!fork_to_background)
     {
         int status;
-        wait(&status);
 
-        if(WEXITSTATUS(status) != 255)
+        waitpid(current_pid, &status, WCONTINUED);
+
+        if(WEXITSTATUS(status) != 255 && ifish.command_count < 10)
             ++ifish.command_count;
+    }
+    else
+    {
+        printf("[%d] %s\n", current_pid, argv[0]);
     }
 }
 

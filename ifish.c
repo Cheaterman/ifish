@@ -14,7 +14,10 @@ main()
         prompt_show();
 
         if(fgets(input, 120, stdin) == NULL)
+        {
+            printf("\n");
             ifish.quit = 1;
+        }
         else
         {
 #ifdef DEBUG
