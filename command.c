@@ -9,6 +9,13 @@ command_interpret(char* input)
     if(argv[0] == NULL)
         return;
 
+    if(!strcmp(argv[0], "quit")
+       || !strcmp(argv[0], "exit"))
+    {
+        ifish.quit = 1;
+        return;
+    }
+
 #ifdef DEBUG
     int i;
     for(i = 0; argv[i] != NULL; ++i)

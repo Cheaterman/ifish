@@ -7,8 +7,6 @@
 int
 main()
 {
-    int quit = 0;
-
     do
     {
         char input[121];
@@ -16,7 +14,7 @@ main()
         prompt_show();
 
         if(fgets(input, 120, stdin) == NULL)
-            quit = 1;
+            ifish.quit = 1;
         else
         {
 #ifdef DEBUG
@@ -25,5 +23,5 @@ main()
             command_interpret(input);
         }
 
-    } while(!quit);
+    } while(!ifish.quit);
 }
