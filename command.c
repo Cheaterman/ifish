@@ -42,7 +42,8 @@ command_interpret(char* input)
                     command = (Command*) command->next;
 
                 memory_get(command, line);
-                printf(" %s%d: %s\n", (remaining_commands >= 9 ? "" : " "), remaining_commands--, line);
+                printf(" %s%d: %s\n", (remaining_commands >= 9 ? "" : " "), remaining_commands, line);
+                remaining_commands -= 1;
             } while(remaining_commands > 0);
         }
 

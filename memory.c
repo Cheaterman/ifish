@@ -59,6 +59,8 @@ memory_next_available(void)
     for(i = 0; i < 64; ++i)
         if(!ifish.memory_usage[i])
             return ifish.memory[i];
+
+    return NULL;
 }
 
 void
@@ -75,6 +77,12 @@ memory_store(char* command)
     for(i = 0; i < strlen(command); i += 8)
     {
         next_available = memory_next_available();
+        if(next_available == NULL)
+        {
+            printf("Assertion failed: next_available is NULL at memory.c:81\n");
+            exit(-1);
+        }
+
         strncpy(next_available, command + i, 8);
         new_command->data[i] = next_available;
 

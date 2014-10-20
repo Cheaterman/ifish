@@ -27,4 +27,6 @@ main()
         }
 
     } while(!ifish.quit);
+
+    return 0;
 }
