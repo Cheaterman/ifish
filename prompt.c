@@ -3,8 +3,7 @@
 void
 prompt_show()
 {
-    char *user;
-    user = getenv("USER");
+    char *user = getenv("USER");
 
     printf("%s@%s %d $ ", (user != NULL ? user : '\0'), "ifish", ifish.command_count);
 }

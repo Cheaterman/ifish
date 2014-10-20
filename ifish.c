@@ -20,7 +20,7 @@ main()
         else
         {
 #ifdef DEBUG
-            printf("%s", input);
+            printf("%s", (strcmp(input, "\n") ? input : ""));
 #endif
             command_interpret(input);
         }
