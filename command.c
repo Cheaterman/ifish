@@ -30,11 +30,17 @@ command_interpret(char* input)
             path_element = strtok(NULL, ":");
         }
 
-        printf("\nifish: %s: command not found\n", argv[0]);
+        printf("ifish: %s: command not found\n", argv[0]);
         exit(-1);
     }
     else
-        wait();
+    {
+        int status;
+        wait(&status);
+
+        if(WEXITSTATUS(status) != 255)
+            ++ifish.command_count;
+    }
 }
 
 void

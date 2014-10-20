@@ -6,7 +6,6 @@
 typedef struct
 {
     int command_count;
-    int current_pid;
 }
 ifish_globals;
 
