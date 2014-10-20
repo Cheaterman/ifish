@@ -16,6 +16,77 @@ command_interpret(char* input)
         return;
     }
 
+    if(!strcmp(argv[0], "h"))
+    {
+        char line[121] = "";
+        int num_commands = 0;
+        Command* command = ifish.command_history;
+
+        while(command != NULL)
+        {
+            command = (Command*) command->next;
+            ++num_commands;
+        }
+
+        printf("History of the last %d commands:\n", num_commands);
+
+        if(ifish.command_history != NULL)
+        {
+            int i, remaining_commands;
+
+            remaining_commands = num_commands;
+            do
+            {
+                command = ifish.command_history;
+                for(i = 0; i < remaining_commands - 1; ++i)
+                    command = (Command*) command->next;
+
+                memory_get(command, line);
+                printf(" %s%d: %s\n", (remaining_commands >= 9 ? "" : " "), remaining_commands--, line);
+            } while(remaining_commands > 0);
+        }
+
+#ifdef DEBUG
+        int i, j, k, l;
+
+        printf("DEBUG - MEMORY USAGE:\n");
+        for(i = 0; i < 2; ++i)
+        {
+            for(j = 0; j < 32; ++j)
+                printf("%d", ifish.memory_usage[32 * i + j]);
+            printf("\n");
+        }
+
+        printf("DEBUG - MEMORY CONTENT:\n");
+        for(i = 0; i < 8; ++i)
+        {
+            for(j = 0; j < 8; ++j)
+            {
+                for(k = 0; k < 2; ++k)
+                {
+                    for(l = 0; l < 4; ++l)
+                        printf("%c", ifish.memory[i * 8 + j][k * 4 + l]);
+
+                    printf(" ");
+                }
+
+                printf("##");
+            }
+
+            printf("\n");
+        }
+
+        printf("DEBUG - COMMAND HISTORY:\n");
+        Command* command = ifish.command_history;
+        do
+        {
+            printf("Data0: %s\n", command->data[0]);
+            command = (Command*) command->next;
+        } while(command != NULL);
+#endif
+        return;
+    }
+
     int i, fork_to_background = 0;
     for(i = 0; argv[i] != NULL; ++i)
     {
@@ -29,6 +100,8 @@ command_interpret(char* input)
         fork_to_background = 1;
         argv[i - 1] = NULL;
     }
+
+    memory_save(argv);
 
     int current_pid = safefork();
     if(current_pid == 0)

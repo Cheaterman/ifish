@@ -7,6 +7,7 @@
 
 #include "ifish.h"
 #include "safefork.h"
+#include "memory.h"
 
 void
 command_interpret(char*);
