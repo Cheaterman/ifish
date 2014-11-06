@@ -78,7 +78,7 @@ command_interpret(char* input)
         }
 
         printf("DEBUG - COMMAND HISTORY:\n");
-        Command* command = ifish.command_history;
+        command = ifish.command_history;
         do
         {
             printf("Data0: %s\n", command->data[0]);

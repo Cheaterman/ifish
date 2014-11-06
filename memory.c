@@ -4,7 +4,7 @@ void
 memory_save(char* argv[])
 {
     int i;
-    char full_command[121];
+    char full_command[121] = {'\0'};
 
     for(i = 0; argv[i] != NULL; ++i)
         sprintf(full_command, "%s %s", full_command, argv[i]);
@@ -79,7 +79,7 @@ memory_store(char* command)
         next_available = memory_next_available();
         if(next_available == NULL)
         {
-            printf("Assertion failed: next_available is NULL at memory.c:81\n");
+            printf("Assertion failed: next_available is NULL at memory.c:82\n");
             exit(-1);
         }
 
