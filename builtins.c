@@ -127,6 +127,8 @@ builtins_interpret(char* argv[])
         }
 #endif
     }
+    else if(!strcmp(argv[0], "does_it_pipe?"))
+        printf("_u ← this is a pipe.\nPut some grass in, enjoy!\n");
     else
         return 0;
 
