@@ -13,12 +13,19 @@ memory_save(char* argv[])
         memory_erase_last();
 
     memory_store(full_command);
+    ++ifish.command_count;
 }
 
 void
 memory_erase_last(void)
 {
     Command *last_command = ifish.command_history, *previous_command = NULL;
+
+    if(last_command == NULL)
+    {
+        printf("Assertion failed: last_command is NULL at memory.c:25\n");
+        exit(-1);
+    }
 
     while(last_command->next != NULL)
     {
@@ -27,16 +34,24 @@ memory_erase_last(void)
     }
 
     int i, j;
-    for(i = 0; i < 15; ++i)
+    for(i = 0; i < ARRAY_SIZE(last_command->data); ++i)
+    {
         if(last_command->data[i] != NULL)
+        {
+            memset(last_command->data[i], 0, 8);
             for(j = 0; j < 64; ++j)
                 if(last_command->data[i] == ifish.memory[j])
-                    ifish.memory_usage[i] = 0;
+                    ifish.memory_usage[j] = 0;
+        }
+    }
 
     if(previous_command != NULL)
     {
         previous_command->next = NULL;
     }
+
+    --ifish.command_count;
+    free(last_command);
 }
 
 int
@@ -71,6 +86,9 @@ memory_store(char* command)
     Command* new_command;
     new_command = malloc(sizeof(Command));
 
+    for(i = 0; i < ARRAY_SIZE(new_command->data); ++i)
+        new_command->data[i] = NULL;
+
     new_command->next = (struct Command*) ifish.command_history;
     ifish.command_history = new_command;
 
@@ -79,12 +97,12 @@ memory_store(char* command)
         next_available = memory_next_available();
         if(next_available == NULL)
         {
-            printf("Assertion failed: next_available is NULL at memory.c:82\n");
+            printf("Assertion failed: next_available is NULL at memory.c:94\n");
             exit(-1);
         }
 
         strncpy(next_available, command + i, 8);
-        new_command->data[i] = next_available;
+        new_command->data[(int)(i / 8)] = next_available;
 
         for(j = 0; j < 64; ++j)
             if(ifish.memory[j] == next_available)
@@ -95,6 +113,16 @@ memory_store(char* command)
 void
 memory_get(Command* command, char* line)
 {
-    if(command->data != NULL)
-        strcpy(line, command->data[0]);
+    int i;
+    char data[9] = {'\0'};
+
+    for(i = 0; i < ARRAY_SIZE(command->data); ++i)
+    {
+        if(command->data[i] != NULL)
+        {
+            strncpy(data, command->data[i], 8);
+            strncat(line, data, 120);
+            line[120] = '\0';
+        }
+    }
 }

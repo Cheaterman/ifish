@@ -8,8 +8,10 @@
 typedef struct
 {
     struct Command* next;
-    char* data[15];
+    char *data[15];
 } Command;
+
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 
 #include "ifish.h"
 

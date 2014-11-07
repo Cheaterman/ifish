@@ -3,29 +3,36 @@
 void
 command_interpret(char* input)
 {
-    char *argv[21];
+    int i;
+    char *argv[21] = {NULL};
+
     command_split(input, argv);
 
     if(argv[0] == NULL)
         return;
 
+    memory_save(argv);
+
     if(!strcmp(argv[0], "quit")
        || !strcmp(argv[0], "exit"))
     {
         ifish.quit = 1;
-        return;
     }
-
-    if(!strcmp(argv[0], "h"))
+    else if(!strcmp(argv[0], "h")
+       || !strcmp(argv[0], "history"))
     {
-        char line[121] = "";
         int num_commands = 0;
         Command* command = ifish.command_history;
 
-        while(command != NULL)
+        if(command != NULL)
         {
-            command = (Command*) command->next;
             ++num_commands;
+
+            while(command->next != NULL)
+            {
+                command = (Command*) command->next;
+                ++num_commands;
+            }
         }
 
         printf("History of the last %d commands:\n", num_commands);
@@ -37,18 +44,20 @@ command_interpret(char* input)
             remaining_commands = num_commands;
             do
             {
+                char line[121] = {'\0'};
+
                 command = ifish.command_history;
                 for(i = 0; i < remaining_commands - 1; ++i)
                     command = (Command*) command->next;
 
                 memory_get(command, line);
-                printf(" %s%d: %s\n", (remaining_commands >= 9 ? "" : " "), remaining_commands, line);
-                remaining_commands -= 1;
+                printf(" %s%d: %s\n", (remaining_commands > 9 ? "" : " "), remaining_commands, line);
+                --remaining_commands;
             } while(remaining_commands > 0);
         }
 
 #ifdef DEBUG
-        int i, j, k, l;
+        int j, k, l;
 
         printf("DEBUG - MEMORY USAGE:\n");
         for(i = 0; i < 2; ++i)
@@ -76,83 +85,77 @@ command_interpret(char* input)
 
             printf("\n");
         }
-
-        printf("DEBUG - COMMAND HISTORY:\n");
-        command = ifish.command_history;
-        do
-        {
-            printf("Data0: %s\n", command->data[0]);
-            command = (Command*) command->next;
-        } while(command != NULL);
 #endif
+
+        for(i = 0; argv[i] != NULL; ++i)
+            free(argv[i]);
+
         return;
-    }
-
-    int i, fork_to_background = 0;
-    for(i = 0; argv[i] != NULL; ++i)
-    {
-#ifdef DEBUG
-        printf("%s\n", argv[i]);
-#endif
-    }
-
-    if(i != 0 && !strcmp(argv[i - 1], "&"))
-    {
-        fork_to_background = 1;
-        argv[i - 1] = NULL;
-    }
-
-    memory_save(argv);
-
-    int current_pid = safefork();
-    if(current_pid == 0)
-    {
-        char *path = getenv("PATH"), *path_element, attempted_filename[120];
-
-        path_element = strtok(path, ":");
-
-        while(path_element != NULL)
-        {
-            sprintf(attempted_filename, "%s/%s", path_element, argv[0]);
-            execve(attempted_filename, argv, NULL);
-
-            path_element = strtok(NULL, ":");
-        }
-
-        printf("ifish: %s: command not found\n", argv[0]);
-        exit(-1);
-    }
-    else if(!fork_to_background)
-    {
-        int status;
-
-        waitpid(current_pid, &status, WCONTINUED);
-
-        if(WEXITSTATUS(status) != 255 && ifish.command_count < 10)
-            ++ifish.command_count;
     }
     else
     {
-        printf("[%d] %s\n", current_pid, argv[0]);
+        int fork_to_background = 0;
+        for(i = 0; argv[i] != NULL; ++i)
+        {
+#ifdef DEBUG
+            printf("%s\n", argv[i]);
+#endif
+        }
+
+        if(i != 0 && !strcmp(argv[i - 1], "&"))
+        {
+            fork_to_background = 1;
+            argv[i - 1] = NULL;
+        }
+
+        int current_pid = safefork();
+        if(current_pid == 0)
+        {
+            char *path = getenv("PATH"), *path_element, attempted_filename[121];
+
+            path_element = strtok(path, ":");
+
+            while(path_element != NULL)
+            {
+                snprintf(attempted_filename, sizeof(attempted_filename), "%s/%s", path_element, argv[0]);
+                execve(attempted_filename, argv, NULL);
+
+                path_element = strtok(NULL, ":");
+            }
+
+            printf("ifish: %s: command not found\n", argv[0]);
+            exit(-1);
+        }
+        else if(!fork_to_background)
+        {
+            int status;
+
+            waitpid(current_pid, &status, 0);
+        }
+        else
+        {
+            printf("[%d] %s\n", current_pid, argv[0]);
+        }
     }
+
+    for(i = 0; argv[i] != NULL; ++i)
+        free(argv[i]);
 }
 
 void
 command_split(char* input, char* argv[])
 {
-    char *input_element, *word;
+    char *input_element;
     int i = 0;
 
     input_element = strtok(input, " \n");
 
-    while(input_element != NULL)
+    while(input_element != NULL && i < 21)
     {
-        word = malloc(strlen(input_element) + 1);
-        sprintf(word, "%s", input_element);
-        argv[i++] = word;
+        argv[i] = malloc(strlen(input_element) + 1);
+        strcpy(argv[i], input_element);
 
         input_element = strtok(NULL, " \n");
+        ++i;
     }
-
-    argv[i] = NULL;
 }

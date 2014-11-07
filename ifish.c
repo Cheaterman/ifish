@@ -13,7 +13,7 @@ main()
 
         prompt_show();
 
-        if(fgets(input, 120, stdin) == NULL)
+        if(fgets(input, sizeof(input), stdin) == NULL)
         {
             printf("\n");
             ifish.quit = 1;
@@ -23,6 +23,13 @@ main()
 #ifdef DEBUG
             printf("%s", (strcmp(input, "\n") ? input : ""));
 #endif
+
+            if(input[strlen(input) - 1] != '\n')
+            {
+                int c;
+                while((c = getchar()) != '\n' && c != EOF);
+            }
+
             command_interpret(input);
         }
 
