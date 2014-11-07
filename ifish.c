@@ -7,13 +7,15 @@
 int
 main()
 {
+    ifish.command_history = NULL;
+
     do
     {
         char input[121];
 
         prompt_show();
 
-        if(fgets(input, sizeof(input), stdin) == NULL)
+        if(command_get(input, sizeof(input)) == NULL)
         {
             printf("\n");
             ifish.quit = 1;
@@ -21,14 +23,14 @@ main()
         else
         {
 #ifdef DEBUG
-            printf("%s", (strcmp(input, "\n") ? input : ""));
+            if(strcmp(input, "\n"))
+                fprintf(stderr, "DEBUG - INPUT: %s%s", input,
+                (
+                    input[strlen(input) - 1] != '\n'
+                    ? "\n"
+                    : ""
+                ));
 #endif
-
-            if(input[strlen(input) - 1] != '\n')
-            {
-                int c;
-                while((c = getchar()) != '\n' && c != EOF);
-            }
 
             command_interpret(input);
         }

@@ -14,12 +14,13 @@ typedef struct
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 
 #include "ifish.h"
+#include "command.h"
 
 void
 memory_save(char** argv);
 
 void
-memory_erase_last(void);
+memory_erase(Command*);
 
 int
 memory_available(int size);

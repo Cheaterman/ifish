@@ -9,6 +9,10 @@
 #include "ifish.h"
 #include "safefork.h"
 #include "memory.h"
+#include "builtins.h"
+
+char*
+command_get(char*, int);
 
 void
 command_interpret(char*);
